@@ -1,5 +1,6 @@
 /*
     WSRadio official server code
+    Make sure to include songs in the root directory of this script if the mode is set to "normal"
 */
 
 const { spawn } = require('child_process');
