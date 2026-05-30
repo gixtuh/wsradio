@@ -15,7 +15,7 @@ const playlist = ['song1.mp3', 'song2.mp3', 'song3.mp3', 'song4.mp3', 'song5.mp3
 const playlistRandom = Math.floor(Math.random() * playlist.length) // NOT a config. it's doing here to define a random song index from playlist.
 let currentSongIndex = playlistRandom; // Start from (0 = from the start, playlistRandom = random song from the playlist)
 const mode = 'global'
-const urlStart = "https://cdn.glitch.global/4453073f-02f0-437a-a9e2-cf0ac7dee63d" // Song library URL
+const urlStart = "https://gixtuh.vercel.app/files/songs" // Song library URL
 /* supported items for const mode: 
 normal - No effects, grabs sounds from local storage
 global - No effects, grabs sounds from a server (urlStart combined with playlist
