@@ -5,7 +5,7 @@
 
 const { spawn } = require('child_process');
 const WebSocket = require('ws');
-const wss = new WebSocket.Server({ port: 8080 });
+const wss = new WebSocket.Server({ port: 8080 }); // yes default port is 8080
 const fs = require('fs');
 let ffmpeg;
 
