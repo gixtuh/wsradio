@@ -1,18 +1,38 @@
 {
-    "grabFrom": "local or global",
+    "grabFrom": "global",
     "chooserandom":true,
     "addFFmpegOptions":"",
-    "globalPlaylistDB": "https://example.com/songs",
+    "globalPlaylistDB": "https://gixtuh.vercel.app/files/songs",
     "use":{
-        "songfile.mp3": {
-            "title": "title",
-            "author": "author",
-            "icon": "https://example.com/songicon.png"
+        "song1.mp3": {
+            "title": "Energy",
+            "author": "Elektronomia",
+            "icon": "https://linkstorage.linkfire.com/medialinks/images/d3c74360-721f-4856-bbd6-fd6946f34d36/artwork-440x440.jpg"
         },
-        "anothersongfile.mp3": {
-            "title": "title",
-            "author": "author",
-            "icon": "https://example.com/anothersongicon.png"
+        "song2.mp3": {
+            "title": "Firefly",
+            "author": "Jim Yosef",
+            "icon": "https://linkstorage.linkfire.com/medialinks/images/fb53a83b-d57a-48db-b924-0e020108650a/artwork-440x440.jpg"
+        },
+        "song3.mp3": {
+            "title": "Cetus",
+            "author": "Lensko",
+            "icon": "https://linkstorage.linkfire.com/medialinks/images/cb205a06-2ec3-4478-b933-3752e36d2bb2/artwork-440x440.jpg"
+        },
+        "song4.mp3": {
+            "title": "Infectious",
+            "author": "Tobu",
+            "icon": "https://linkstorage.linkfire.com/medialinks/images/cb205a06-2ec3-4478-b933-3752e36d2bb2/artwork-440x440.jpg"
+        },
+        "song5.mp3": {
+            "title": "We Are",
+            "author": "Whales & Jo. Cohen",
+            "icon": "https://linkstorage.linkfire.com/medialinks/images/7c60c80e-a294-4335-a208-b50f87e3b14a/artwork-440x440.jpg"
+        },
+        "song6.mp3": {
+            "title": "Feel Good",
+            "author": "Syn Cole",
+            "icon": "https://linkstorage.linkfire.com/medialinks/images/7c60c80e-a294-4335-a208-b50f87e3b14a/artwork-440x440.jpg"
         }
     }
 }
