@@ -1,0 +1,18 @@
+{
+    "grabFrom": "local or global",
+    "chooserandom":true,
+    "addFFmpegOptions":"",
+    "globalPlaylistDB": "https://example.com/songs",
+    "use":{
+        "songfile.mp3": {
+            "title": "title",
+            "author": "author",
+            "icon": "https://example.com/songicon.png"
+        },
+        "anothersongfile.mp3": {
+            "title": "title",
+            "author": "author",
+            "icon": "https://example.com/anothersongicon.png"
+        }
+    }
+}

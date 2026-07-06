@@ -1,136 +1,221 @@
-/*
-    WSRadio official server code
-    Make sure to include songs in the root directory of this script if the mode is set to "normal"
-*/
+const { spawn } = require("child_process");
+const WebSocket = require("ws");
+const fs = require("fs");
+const path = require("path");
 
-const { spawn } = require('child_process');
-const WebSocket = require('ws');
-const wss = new WebSocket.Server({ port: 8080 }); // yes default port is 8080
-const fs = require('fs');
+const wss = new WebSocket.Server({ port: 8080 });
+
 let ffmpeg;
+let settings = loadSettings();
 
+let currentIndex = 0;
+let songKeys = [];
+let currentMeta = null;
+let playbackTimer = null;
 
+function loadSettings() {
+  const raw = fs.readFileSync("./settings.json", "utf-8");
+  return JSON.parse(raw);
+}
 
-// CONFIG
-const playlist = ['song1.mp3', 'song2.mp3', 'song3.mp3', 'song4.mp3', 'song5.mp3', 'song6.mp3']; // Playlist with files in the directory
-const playlistRandom = Math.floor(Math.random() * playlist.length) // NOT a config. it's doing here to define a random song index from playlist.
-let currentSongIndex = playlistRandom; // Start from (0 = from the start, playlistRandom = random song from the playlist)
-const mode = 'global'
-const urlStart = "https://gixtuh.vercel.app/files/songs" // Song library URL
-/* supported items for const mode: 
-normal - No effects, grabs sounds from local storage
-global - No effects, grabs sounds from a server (urlStart combined with playlist
-normal,low-quality - Low quality audio, grabs sounds from local storage
-normal,low-bitrate - Low bitrate audio, grabs sounds from local storage
-global,low-quality - Low quality audio, grabs sounds from a server (urlStart combined with playlist)
-global,low-bitrate - Low bitrate audio, grabs sounds from a server (urlStart combined with playlist)
-*/
-
-
-
-
-function startFFMpeg(song) {
-  let currentUrl = urlStart + '/' + song
-  if (mode === "normal,low-quality") {
-    ffmpeg = spawn('ffmpeg', [
-      '-re',
-      '-i', song,
-      '-f', 'lavfi',
-      '-i', 'anoisesrc=c=pink:d=0.0',
-      '-filter_complex', "[0][1]amix=inputs=2:duration=shortest:weights='1 0.5'",
-      '-ar', '8000',
-      '-ac', '1',
-      '-ab', '32k',
-      '-f', 'mp3',
-      '-vn',
-      '-'
-  ]);
-  } else if (mode === 'normal,low-bitrate') {
-    ffmpeg = spawn('ffmpeg', [
-      '-re',
-      '-i', song,
-      '-f', 'mp3',
-      '-ar', '8000',
-      '-vn',
-      '-'
-    ])
-  } else if (mode === "normal") {
-    ffmpeg = spawn('ffmpeg', [
-      '-re',
-      '-i', song,
-      '-f', 'mp3',
-      '-vn',
-      '-'
-  ]);
-  } else if (mode === 'global,low-quality') {
-    ffmpeg = spawn('ffmpeg', [
-      '-re',
-      '-i', currentUrl,
-      '-f', 'lavfi',
-      '-i', 'anoisesrc=c=pink:d=0.0',
-      '-filter_complex', "[0][1]amix=inputs=2:duration=shortest:weights='1 0.5'",
-      '-ar', '8000',
-      '-ac', '1',
-      '-ab', '32k',
-      '-f', 'mp3',
-      '-vn',
-      '-'
-  ]);
-  } else if (mode === 'global,low-bitrate') {
-    ffmpeg = spawn('ffmpeg', [
-      '-re',
-      '-i', currentUrl,
-      '-f', 'mp3',
-      '-ar', '8000',
-      '-vn',
-      '-'
-  ]);
-  } else if (mode === 'global') {
-    ffmpeg = spawn('ffmpeg', [
-      '-re',
-      '-i', currentUrl,
-      '-f', 'mp3',
-      '-vn',
-      '-'
-  ]);
+function rebuildPlaylist() {
+  settings = loadSettings();
+  
+  songKeys = Object.keys(settings.use);
+  
+  if (settings.chooserandom) {
+    currentIndex = Math.floor(Math.random() * songKeys.length);
   } else {
-    throw 'Mode is not recognized.'
+    currentIndex = 0;
   }
+}
 
-  ffmpeg.on('exit', (code, signal) => {
-    if (code === 0) {
-      console.log(`${song} finish`);
+let shuffledQueue = [];
+
+function rebuildShuffle() {
+  songKeys = Object.keys(settings.use);
+  
+  shuffledQueue = [...songKeys];
+  
+  for (let i = shuffledQueue.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledQueue[i], shuffledQueue[j]] = [shuffledQueue[j], shuffledQueue[i]];
+  }
+}
+
+function getNextSongKey() {
+  if (settings.chooserandom) {
+    if (shuffledQueue.length === 0) {
+      rebuildShuffle();
+    }
+    return shuffledQueue.shift();
+  }
+  
+  const next = songKeys[currentIndex];
+  currentIndex = (currentIndex + 1) % songKeys.length;
+  return next;
+}
+
+function resolveInput(file) {
+  if (settings.grabFrom === "local") {
+    return path.join(__dirname, "songs", file);
+  }
+  
+  if (settings.grabFrom === "global") {
+    return `${settings.globalPlaylistDB}/${file}`;
+  }
+  
+  throw new Error("grabFrom must be 'local' or 'global'");
+}
+
+function getMeta(fileKey) {
+  return settings.use[fileKey] || {
+    title: fileKey,
+    author: "Unknown",
+    icon: ""
+  };
+}
+const { spawnSync } = require("child_process");
+
+function getDuration(file) {
+  const result = spawnSync("ffprobe", [
+    "-v", "error",
+    "-show_entries", "format=duration",
+    "-of", "default=noprint_wrappers=1:nokey=1",
+    file
+  ], {
+    encoding: "utf8"
+  });
+  
+  return parseFloat(result.stdout) || 0;
+}
+
+function startFFmpeg(songKey) {
+  const file = resolveInput(songKey);
+  const meta = getMeta(songKey);
+  const duration = getDuration(file);
+  
+  console.log(`now playing: ${meta.title} (${meta.author})`);
+  
+  currentMeta = {
+    title: meta.title,
+    author: meta.author,
+    icon: meta.icon,
+    duration
+  };
+  
+  ffmpeg = spawn("ffmpeg", [
+    "-re",
+    "-i", file,
+    "-f", "mp3",
+    "-vn",
+    ...parseExtraFFmpeg(settings.addFFmpegOptions),
+    "-"
+  ]);
+  
+  const startTime = Date.now();
+  
+  broadcastJSON({
+    type: "meta",
+    information: currentMeta
+  });
+  
+  broadcastJSON({
+    type: "time",
+    currentTime: (Date.now() - startTime) / 1000
+  });
+  
+  playbackTimer = setInterval(() => {
+    
+    broadcastJSON({
+      type: "time",
+      currentTime: (Date.now() - startTime) / 1000
+    });
+    
+  }, 1000);
+  
+  
+  ffmpeg.stdout.on("data", (chunk) => {
+    broadcastBinary(chunk);
+  });
+  
+  ffmpeg.stderr.on("data", (d) => {
+    console.log(d.toString());
+  });
+  
+  ffmpeg.on("close", () => {
+    
+    setTimeout(() => {
+      clearInterval(playbackTimer);
+      
       nextSong();
-    } else {
-      console.log(`${song}/FFmpeg error: ${code}, sig: ${signal}.`);
+    }, 1000)
+    
+  });
+}
+
+function parseExtraFFmpeg(str) {
+  if (!str || typeof str !== "string") return [];
+  return str.split(" ").filter(Boolean);
+}
+
+function broadcastJSON(data) {
+  const payload = JSON.stringify(data);
+  
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(payload);
     }
   });
+}
 
-  ffmpeg.stdout.on('data', (chunk) => {
-    wss.clients.forEach(client => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(chunk);
-      }
-    });
-  });
-
-  ffmpeg.stderr.on('data', (data) => {
-    console.log(`${data}`);
+function broadcastBinary(buffer) {
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(buffer, { binary: true });
+    }
   });
 }
 
 function nextSong() {
-  currentSongIndex = (currentSongIndex + 1) % playlist.length;
-  const nextSong = playlist[currentSongIndex];
-  console.log(nextSong);
-  startFFMpeg(nextSong);
+  settings = loadSettings();
+  songKeys = Object.keys(settings.use);
+  
+  if (settings.chooserandom) {
+    if (shuffledQueue.length === 0) {
+      rebuildShuffle();
+    }
+  } else {
+    currentIndex = currentIndex % songKeys.length;
+  }
+  
+  const nextKey = getNextSongKey();
+  startFFmpeg(nextKey);
 }
 
-startFFMpeg(playlist[currentSongIndex]);
+settings = loadSettings();
+songKeys = Object.keys(settings.use);
 
-wss.on('connection', (ws) => {
-  console.log('client connected');
-  ws.on('close', () => {
-      console.log('client closed')
-  })
+if (settings.chooserandom) {
+  rebuildShuffle();
+} else {
+  currentIndex = 0;
+}
+
+const firstKey = getNextSongKey();
+startFFmpeg(firstKey);
+
+wss.on("connection", (ws) => {
+  console.log("client connected");
+  
+  if (currentMeta) {
+    ws.send(JSON.stringify({
+      type: "meta",
+      information: currentMeta
+    }));
+  }
+  
+  ws.on("close", () => {
+    console.log("client disconnected");
+  });
 });
