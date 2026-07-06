@@ -61,7 +61,7 @@ These song files are specified as a key in the `use` property, so for example if
 ```
 
 # Backwards compatibility
-WSRadio once had a really old frontend. This version of WSRadio backend is **fully compatible** with that version
+WSRadio once had [a really old frontend](https://wsradio.vercel.app/old_release_v1.1.html). This version of WSRadio backend is **fully compatible** with that version. And [the other one](https://wsradio.vercel.app/old_release_v1.html) too.
 
 ## DISCLAIMER
 WSRadio itself does **NOT** come with preset songs, therefore if an owner is asked to take down a specific song from their library, it is to blame them, not us.
