@@ -2,7 +2,7 @@
     "grabFrom": "global",
     "chooserandom":true,
     "addFFmpegOptions":"",
-    "globalPlaylistDB": "https://gixtuh.vercel.app/files/songs",
+    "globalPlaylistDB": "https://gixtuh.vercel.app/files/ncs%20songs%20for,,%20wsradio",
     "use":{
         "song1.mp3": {
             "title": "Energy",
@@ -33,6 +33,16 @@
             "title": "Feel Good",
             "author": "Syn Cole",
             "icon": "https://linkstorage.linkfire.com/medialinks/images/7c60c80e-a294-4335-a208-b50f87e3b14a/artwork-440x440.jpg"
+        },
+        "song7.mp3": {
+            "title": "On & On (feat. Daniel Levi)",
+            "author": "Cartoon, Daniel Levi, Jéja",
+            "icon": "https://linkstorage.linkfire.com/medialinks/images/df98e91f-730c-471b-bfdb-9348b75825fd/artwork-440x440.jpg"
+        },
+        "song8.mp3": {
+            "title": "Disfigure",
+            "author": "Blank",
+            "icon": "https://linkstorage.linkfire.com/medialinks/images/12a77b12-0fe6-45de-b710-48e90ffa698e/artwork-440x440.jpg"
         }
     }
 }
