@@ -1,14 +1,9 @@
 {
     "grabFrom": "global",
-    "chooserandom":true,
-    "addFFmpegOptions":"",
+    "chooserandom": true,
+    "addFFmpegOptions": "",
     "globalPlaylistDB": "https://hvxbc73zgt21bbhl.public.blob.vercel-storage.com",
-    "use":{
-        "song1.mp3": {
-            "title": "Energy",
-            "author": "Elektronomia",
-            "icon": "https://linkstorage.linkfire.com/medialinks/images/d3c74360-721f-4856-bbd6-fd6946f34d36/artwork-440x440.jpg"
-        },
+    "use": {
         "song2.mp3": {
             "title": "Firefly",
             "author": "Jim Yosef",
