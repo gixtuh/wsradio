@@ -2,7 +2,7 @@
     "grabFrom": "global",
     "chooserandom":true,
     "addFFmpegOptions":"",
-    "globalPlaylistDB": "https://gixtuh.vercel.app/files/ncs%20songs%20for,,%20wsradio",
+    "globalPlaylistDB": "https://gixtuh.vercel.app/files/songs",
     "use":{
         "song1.mp3": {
             "title": "Energy",
