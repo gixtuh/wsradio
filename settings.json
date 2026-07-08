@@ -2,7 +2,7 @@
     "grabFrom": "global",
     "chooserandom":true,
     "addFFmpegOptions":"",
-    "globalPlaylistDB": "https://gixtuh.vercel.app/files/songs",
+    "globalPlaylistDB": "https://hvxbc73zgt21bbhl.public.blob.vercel-storage.com",
     "use":{
         "song1.mp3": {
             "title": "Energy",
